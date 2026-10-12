@@ -1,0 +1,20 @@
+# Render Blueprint: deploys the FastAPI backend from server/.
+# Render dashboard → New → Blueprint → pick this repo. Set GEMINI_API_KEY when prompted.
+services:
+  - type: web
+    name: algorithmic-rag-engine-api
+    runtime: python
+    rootDir: server
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', device='cpu')"
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PYTHONIOENCODING
+        value: utf-8
+      - key: HF_HOME
+        value: /opt/render/project/src/server/.cache/huggingface

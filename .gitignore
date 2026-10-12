@@ -1,0 +1,26 @@
+# Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Node / Next.js (client)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.vercel
+
+# Python (server)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.cache/
+.pytest_cache/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

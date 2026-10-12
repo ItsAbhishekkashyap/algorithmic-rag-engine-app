@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Aubergine, Lime & Lilac — design tokens (see design canvas "System" page)
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-paper: #f4f1ea;
+  --color-card: #ffffff;
+  --color-card-2: #fbfaf6;
+  --color-aub: #2b1736;
+  --color-plum: #3a2448;
+  --color-muted: #6b5f70;
+  --color-body: #4a3f50;
+  --color-rule: #ddd6cc;
+  --color-line: #e6e0d6;
+  --color-sand: #ece6da;
+  --color-lime: #c8f169;
+  --color-lilac: #cbbef7;
+  --color-lilac-2: #a996f2;
+  --color-lilac-3: #e6defb;
+  --color-mist: #c9bfd0;
+  --color-mist-2: #e3dce8;
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-aub);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-aub);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-lime);
+  color: var(--color-aub);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-aub);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .disp {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.94;
+    font-variation-settings: "opsz" 96;
+  }
+  .cite {
+    display: inline-block;
+    min-width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    border-radius: 6px;
+    background: var(--color-aub);
+    color: var(--color-lime);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin: 0 4px;
+    vertical-align: 3px;
+  }
+  .hl-sweep {
+    background-image: linear-gradient(var(--color-lime), var(--color-lime));
+    background-repeat: no-repeat;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Ambient loops (time-based). Scroll-driven motion lives in the film engine.
+   --------------------------------------------------------------------------- */
+@keyframes up {
+  from { transform: translateY(110%); }
+  to { transform: none; }
+}
+.line { display: block; overflow: hidden; padding-bottom: 0.08em; }
+.line > span { display: block; animation: up 1.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float { animation: float 4s ease-in-out infinite; }
+
+@keyframes caret { 50% { opacity: 0; } }
+.caret { animation: caret 1s steps(1) infinite; }
+
+@keyframes ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3.2); opacity: 0; } }
+.ping { animation: ping 1.8s ease-out infinite; }
+
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.marquee { animation: marquee 26s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spin { animation: spin 16s linear infinite; }
+
+@keyframes hint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+.hint { animation: hint 1.6s ease-in-out infinite; }
+
+@keyframes pulse-dot { 50% { opacity: 0.35; } }
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+@keyframes cue { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+.cue { animation: cue 1.8s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+
+/* Preloader: a handbook page writes itself, one line is highlighted, the page zooms in. */
+@keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.pl { display: block; height: 9px; border-radius: 5px; background: var(--color-line); transform-origin: 0 50%; animation: draw 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.plh { position: absolute; inset: -5px -4px; border-radius: 5px; background: var(--color-lime); transform-origin: 0 50%; animation: draw 0.55s cubic-bezier(0.65, 0, 0.35, 1) 1.25s both; }
+@keyframes zoom-in { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(7); opacity: 0; } }
+.plcard { animation: zoom-in 1s cubic-bezier(0.7, 0, 0.2, 1) 1.95s forwards; transform-origin: 50% 61%; }
+@keyframes fade-away { to { opacity: 0; visibility: hidden; } }
+.pre { animation: fade-away 0.6s ease 2.45s forwards; }
+.plcap { animation: fade-away 0.3s ease 1.85s forwards; }
+
+/* Studio entrances */
+@keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.rise-in { animation: rise-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes dots { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
+.typing span { animation: dots 1.2s infinite; }
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+input[type="range"] { accent-color: var(--color-aub); }
+
+/* Lenis */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
