@@ -1,0 +1,72 @@
+# Publishes server/ to a Hugging Face Docker Space (free CPU: 2 vCPU, 16 GB RAM).
+#
+# One-time setup (GitHub repo → Settings → Secrets and variables → Actions):
+#   Secrets:   HF_TOKEN        a Hugging Face access token with "write" permission
+#              GEMINI_API_KEY  your Gemini key (copied into the Space as a secret)
+#   Variable (optional): HF_SPACE_ID, defaults to abhi47025/algorithmic-rag-engine-api
+#
+# The Space is created automatically on the first run. API URL:
+#   https://<user>-<space-name>.hf.space   e.g. https://abhi47025-algorithmic-rag-engine-api.hf.space
+name: Deploy server to Hugging Face Spaces
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+      - ".github/workflows/deploy-server-hf.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-server-hf
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      HF_SPACE_ID: ${{ vars.HF_SPACE_ID || 'abhi47025/algorithmic-rag-engine-api' }}
+    steps:
+      - name: Check for HF_TOKEN
+        id: guard
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::notice::HF_TOKEN secret is not set yet; skipping the Hugging Face deploy."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.skip != 'true'
+
+      - uses: actions/setup-python@v5
+        if: steps.guard.outputs.skip != 'true'
+        with:
+          python-version: "3.11"
+
+      - name: Upload server/ to the Space
+        if: steps.guard.outputs.skip != 'true'
+        run: |
+          pip install --quiet "huggingface_hub>=0.24"
+          python - <<'PY'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          space = os.environ["HF_SPACE_ID"]
+          api.create_repo(space, repo_type="space", space_sdk="docker", exist_ok=True)
+          if os.environ.get("GEMINI_API_KEY"):
+              api.add_space_secret(space, "GEMINI_API_KEY", os.environ["GEMINI_API_KEY"])
+          api.upload_folder(
+              repo_id=space,
+              repo_type="space",
+              folder_path="server",
+              commit_message=f"Deploy {os.environ['GITHUB_SHA'][:7]} from GitHub",
+              ignore_patterns=[".env", ".env.*", "__pycache__/*", "*.pyc", ".venv/*", ".cache/*"],
+              delete_patterns=["api/*", "engine/*"],
+          )
+          user, name = space.split("/")
+          print(f"Deployed. Space: https://huggingface.co/spaces/{space}")
+          print(f"API URL: https://{user}-{name}.hf.space".lower().replace("_", "-"))
+          PY

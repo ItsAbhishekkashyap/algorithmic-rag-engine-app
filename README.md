@@ -9,8 +9,9 @@ The web app tells this story as a scroll film, then lets you try it on your own 
 ```
 algorithmic-rag-engine-app/
 ├── client/   Next.js 15 · Tailwind v4 · GSAP · Lenis   → deploy on Vercel
-├── server/   FastAPI · NumPy · sentence-transformers · Gemini → deploy on Render
-└── render.yaml   Render Blueprint for the server
+├── server/   FastAPI · NumPy · sentence-transformers · Gemini → deploy on Hugging Face Spaces (free)
+├── .github/workflows/deploy-server-hf.yml   auto-deploys server/ to the Space
+└── render.yaml   optional Render Blueprint for the server
 ```
 
 ## How it works
@@ -48,20 +49,26 @@ npm run dev                                         # http://localhost:3000
 
 ## Deploy
 
-### Server → Render
-1. Render dashboard → **New → Blueprint** → select this repository. `render.yaml` creates the `algorithmic-rag-engine-api` web service from `server/`.
-2. When prompted, set **`GEMINI_API_KEY`**.
-3. After the first deploy, copy the service URL (e.g. `https://algorithmic-rag-engine-api.onrender.com`) and check `…/health`.
+### Server → Hugging Face Spaces (free, recommended)
+The free CPU Space (2 vCPU, 16 GB RAM) comfortably runs PyTorch + MiniLM. A GitHub Action publishes `server/` to a Docker Space on every push.
 
-Manual alternative: New → Web Service → Root Directory `server`, Build `pip install -r requirements.txt`, Start `uvicorn api.main:app --host 0.0.0.0 --port $PORT`. A `server/Dockerfile` is included if you prefer a Docker service.
+1. Create a Hugging Face **write** token: https://huggingface.co/settings/tokens → *Create new token* → type **Write**.
+2. In this GitHub repo → **Settings → Secrets and variables → Actions → New repository secret**, add:
+   - `HF_TOKEN`: the token from step 1
+   - `GEMINI_API_KEY`: your Gemini key (the Action copies it into the Space's secrets)
+3. **Actions → Deploy server to Hugging Face Spaces → Run workflow.** The first run creates the Space `abhi47025/algorithmic-rag-engine-api` (change it with a repo variable `HF_SPACE_ID`).
+4. Wait for the Space to build (first build ~5–10 min), then open `https://abhi47025-algorithmic-rag-engine-api.hf.space/health`.
 
-Notes: the free plan sleeps when idle, so the first request after a pause is slow while the model loads. The vector store lives in memory, so it resets on restart and is shared by everyone using the same server.
+Notes: free Spaces sleep after ~48 h without traffic and wake on the next request. The vector store is in memory, so it resets on restart and is shared by all visitors.
+
+### Server → Render (alternative)
+`render.yaml` deploys `server/` as a Python web service (New → Blueprint; set `GEMINI_API_KEY`). The free plan has 512 MB RAM and 0.1 CPU. PyTorch + MiniLM measured ~380 MB peak (≈430–480 MB with the Gemini SDKs), so it fits only just and ingestion is slow. Use a 2 GB plan for reliability.
 
 ### Client → Vercel
 1. Vercel → **Add New → Project** → import this repository.
 2. Set **Root Directory** to `client` (framework: Next.js is detected automatically).
 3. Environment variables:
-   - `NEXT_PUBLIC_API_URL` = your Render URL
+   - `NEXT_PUBLIC_API_URL` = your backend URL, e.g. `https://abhi47025-algorithmic-rag-engine-api.hf.space`
    - `NEXT_PUBLIC_SITE_URL` = your Vercel domain (optional; falls back to the Vercel production URL)
 4. Deploy.
 
