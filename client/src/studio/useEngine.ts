@@ -1,20 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getHealth, getStatus, type StoreStatus } from "@/api/engine";
+import { getStatus, type StoreStatus } from "@/api/engine";
 
 export type Health = "checking" | "online" | "offline";
 
-/** Polls the backend's /health and /status (on mount and whenever the tab regains focus). */
+/**
+ * Polls the backend's /status (on mount and whenever the tab regains focus). A successful
+ * /status doubles as the liveness check: some browser extensions block URLs ending in
+ * "/health", so relying on that endpoint made the engine look offline for those visitors.
+ */
 export function useEngine() {
   const [health, setHealth] = useState<Health>("checking");
   const [status, setStatus] = useState<StoreStatus | null>(null);
 
   const refresh = useCallback(async () => {
     try {
-      await getHealth();
-      setHealth("online");
       setStatus(await getStatus());
+      setHealth("online");
     } catch {
       setHealth("offline");
     }

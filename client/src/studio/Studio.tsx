@@ -257,13 +257,24 @@ function Settings({
 
 function EmptyState({ health, status, hasDocument }: { health: Health; status: StoreStatus | null; hasDocument: boolean }) {
   if (health === "offline") {
+    const local = /localhost|127\.0\.0\.1/.test(API_URL);
     return (
-      <div className="rise-in flex flex-col gap-4 rounded-3xl border border-rule bg-card p-7">
-        <h1 className="disp m-0 text-[40px] sm:text-[52px]">The engine is offline.</h1>
-        <p className="m-0 text-base leading-[1.6] text-body">
-          The Studio couldn&rsquo;t reach the FastAPI backend at <span className="font-mono text-sm">{API_URL}</span>. Start it from the project root:
-        </p>
-        <code className="block overflow-x-auto rounded-xl bg-aub px-4 py-3 font-mono text-sm text-lime">uvicorn api.main:app --port 8000</code>
+      <div className="rise-in flex flex-col gap-4 rounded-3xl border border-rule bg-card p-7" role="status">
+        <h1 className="disp m-0 text-[40px] sm:text-[52px]">{local ? "The engine is offline." : "Waking up the engine…"}</h1>
+        {local ? (
+          <>
+            <p className="m-0 text-base leading-[1.6] text-body">
+              The Studio couldn&rsquo;t reach the FastAPI backend at <span className="font-mono text-sm">{API_URL}</span>. Start it from the
+              server folder:
+            </p>
+            <code className="block overflow-x-auto rounded-xl bg-aub px-4 py-3 font-mono text-sm text-lime">uvicorn api.main:app --port 8000</code>
+          </>
+        ) : (
+          <p className="m-0 flex items-center gap-2 text-base leading-[1.6] text-body">
+            The engine sleeps when nobody is using it and takes up to a minute to start. This page retries on its own
+            <span className="typing font-mono" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>
+          </p>
+        )}
       </div>
     );
   }
