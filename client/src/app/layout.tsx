@@ -49,6 +49,10 @@ export const metadata: Metadata = {
     title: SITE.title,
     description: SITE.shortDescription,
   },
+  // Google Search Console "HTML tag" verification; set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION on Vercel.
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export const viewport: Viewport = {
